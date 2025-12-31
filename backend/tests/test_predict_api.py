@@ -1,8 +1,6 @@
 from fastapi.testclient import TestClient
 from app.main import app
 
-client = TestClient(app)
-
 
 def test_predict_success():
     payload = {
@@ -14,11 +12,12 @@ def test_predict_success():
         "policy_tenure": 5,
     }
 
-    response = client.post("/predict", json=payload)
+    with TestClient(app) as client:
+        response = client.post("/predict", json=payload)
 
     assert response.status_code == 200
-    assert "estimated_claim_amount" in response.json()
     assert response.json()["estimated_claim_amount"] > 0
+
     
 def test_predict_validation_error():
     payload = {
